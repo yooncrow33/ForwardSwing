@@ -7,5 +7,6 @@ public enum RenderingOption {
      * Designed for macOS. The DEFAULT option crashes on macOS when resized at low FPS while drawing images.
      * This option should be used for testing only; DEFAULT works perfectly on Windows.
      */
-    LEGACY
+    LEGACY,
+    CRT
 }

@@ -2,21 +2,17 @@ package com.fw.main.utils.input;
 
 import com.fw.main.utils.input.korean.TextManager;
 
-import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
 public abstract class KeyBindingBase {
 
     public KeyBindingBaseOption keyBindingBaseOption;
+
     public void registerKeyBindingBaseOption(KeyBindingBaseOption keyBindingBaseOption) {
         this.keyBindingBaseOption = keyBindingBaseOption;
     }
-
-    protected final InputMap im;
-    protected final ActionMap am;
 
     public enum KBKey {
         // A-Z
@@ -60,69 +56,47 @@ public abstract class KeyBindingBase {
         KBKey(int code) { this.code = code; }
     }
 
+    private final KBKey[] keyTable = new KBKey[65536];
+
     protected KeyBindingBase(Canvas comp) {
         comp.setFocusable(true);
 
-        JComponent dummyHost = new JPanel();
-        this.im = new ComponentInputMap(dummyHost);
-        this.am = new ActionMap();
-
-        build();
+        for (KBKey k : KBKey.values()) {
+            if (k.code >= 0 && k.code < keyTable.length) {
+                keyTable[k.code] = k;
+            }
+        }
 
         comp.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
-                processKeyEvent(e);
+                int code = e.getKeyCode();
+                if (code >= 0 && code < keyTable.length) {
+                    KBKey k = keyTable[code];
+                    if (k != null) {
+                        dispatchPress(k);
+                    }
+                }
             }
 
             @Override
             public void keyReleased(KeyEvent e) {
-                processKeyEvent(e);
-            }
-
-            private void processKeyEvent(KeyEvent e) {
-                KeyStroke stroke = KeyStroke.getKeyStrokeForEvent(e);
-                Object actionKey = im.get(stroke);
-
-                if (actionKey != null) {
-                    Action action = am.get(actionKey);
-                    if (action != null) {
-                        action.actionPerformed(new ActionEvent(comp, ActionEvent.ACTION_PERFORMED, actionKey.toString(), e.getWhen(), e.getModifiersEx()));
+                int code = e.getKeyCode();
+                if (code >= 0 && code < keyTable.length) {
+                    KBKey k = keyTable[code];
+                    if (k != null) {
+                        dispatchRelease(k);
                     }
                 }
             }
         });
     }
 
-    private void build() {
-        for (KBKey k : KBKey.values()) {
-            bind(k);
-        }
-    }
-
-    private void bind(KBKey k) {
-        String n = k.name();
-
-        im.put(KeyStroke.getKeyStroke(k.code, 0, false), n + "_PRESS");
-        am.put(n + "_PRESS", new AbstractAction() {
-            @Override public void actionPerformed(ActionEvent e) {
-                dispatchPress(k);
-            }
-        });
-
-        im.put(KeyStroke.getKeyStroke(k.code, 0, true), n + "_RELEASE");
-        am.put(n + "_RELEASE", new AbstractAction() {
-            @Override public void actionPerformed(ActionEvent e) {
-                dispatchRelease(k);
-            }
-        });
-    }
-
     private void dispatchPress(KBKey k) {
-        if (keyBindingBaseOption!=null) {
-            if (!keyBindingBaseOption.isOn()) {return;}
+        if (keyBindingBaseOption != null && !keyBindingBaseOption.isOn()) {
+            return;
         }
-        if(TextManager.isActiveKoreanObjectIsEmpty()) {
+        if (!TextManager.isActiveKoreanObjectIsEmpty()) {
             return;
         }
         switch (k) {
@@ -194,10 +168,10 @@ public abstract class KeyBindingBase {
     }
 
     private void dispatchRelease(KBKey k) {
-        if (keyBindingBaseOption!=null) {
-            if (!keyBindingBaseOption.isOn()) {return;}
+        if (keyBindingBaseOption != null && !keyBindingBaseOption.isOn()) {
+            return;
         }
-        if(TextManager.isActiveKoreanObjectIsEmpty()) {
+        if (!TextManager.isActiveKoreanObjectIsEmpty()) {
             return;
         }
         switch (k) {

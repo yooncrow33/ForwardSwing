@@ -34,7 +34,7 @@ public class Test extends Base {
 
     static {
         Core.setConfig(new
-                Config.Builder("BeisiqEngine"). // = folder name.
+                Config.Builder("CraftCanvas Engine"). // = folder name.
                 setWindowWidth(1280).
                 setWindowHeight(720).
                 setUseKoreanModule(true).
@@ -52,7 +52,7 @@ public class Test extends Base {
                 setUseConsole(true).
                 setCloseWindowWithKillVM(false).
                 setPerformanceRecorderOption(PerformanceRecorder.CaptureMode.EVERY_FRAME,"test").
-                setRenderingOption(RenderingOption.LEGACY)
+                setRenderingOption(RenderingOption.CRT)
         );
     }
 
@@ -68,7 +68,7 @@ public class Test extends Base {
         mouse.registerMouseInterface(new MouseInterface() {
             @Override
             public void mouseClicked(FwMouseAPI e) {
-                test.play();
+                //test.play();
                 System.out.println("ds");
             }
 
@@ -119,8 +119,8 @@ public class Test extends Base {
         assetManager.mallocTexturePool(3000);
         assetManager.mallocLazyLoadPool(500);
 
-        for (int i = 0; i < 10; i++) {
-            test = init.getAssetInit().registerBootSound("temp_" + i, IoUtils.getEngineResourceStream("326363__wazdabaz__ebs-test.wav"));
+        for (int i = 0; i < 1000; i++) {
+            init.getAssetInit().registerBootTexture("temp_" + i, IoUtils.getEngineResourceStream("CCE.png"));
         }
 
         init.getAssetInit();

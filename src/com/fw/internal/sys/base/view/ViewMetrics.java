@@ -5,6 +5,10 @@ public class ViewMetrics implements IViewMetrics, IMouse {
     private static final int VIRTUAL_HEIGHT = 1080;
     private static final double SCALE_EPSILON = 0.000_001;
 
+    private static final float CURVE_X = 0.05f;
+    private static final float CURVE_Y = 0.06f;
+    private static final float CRT_MARGIN = 0.04f;
+
     private final IFrameSize size;
     private final boolean useIntegerPhysicalScaling;
 
@@ -120,6 +124,43 @@ public class ViewMetrics implements IViewMetrics, IMouse {
                 metrics.currentYOffset(),
                 metrics.currentScale()
         );
+    }
+
+    public void updateVirtualMouseCrt(int mouseX, int mouseY) {
+        int windowW = size.getComponentWidth();
+        int windowH = size.getComponentHeight();
+        if (windowW <= 0 || windowH <= 0) return;
+
+        float drawX = windowW * CRT_MARGIN;
+        float drawY = windowH * CRT_MARGIN;
+        float drawW = windowW - drawX * 2.0f;
+        float drawH = windowH - drawY * 2.0f;
+
+        if (drawW <= 0 || drawH <= 0) return;
+
+        float nx = ((mouseX - drawX) / drawW) * 2.0f - 1.0f;
+        float ny = ((mouseY - drawY) / drawH) * 2.0f - 1.0f;
+
+        /* original
+        float factorX = 1.0f - (ny * ny * CURVE_X);
+        float unwarpedNx = (factorX != 0.0f) ? (nx / factorX) : nx;
+
+        float factorY = 1.0f - (unwarpedNx * unwarpedNx * CURVE_Y);
+        float unwarpedNy = (factorY != 0.0f) ? (ny / factorY) : ny;
+
+         */
+
+        float factorY = 1.0f - (nx * nx * CURVE_Y);
+        float unwarpedNy = (factorY != 0.0f) ? (ny / factorY) : ny;
+
+        float factorX = 1.0f - (unwarpedNy * unwarpedNy * CURVE_X);
+        float unwarpedNx = (factorX != 0.0f) ? (nx / factorX) : nx;
+
+        float u = (unwarpedNx + 1.0f) * 0.5f;
+        float v = (unwarpedNy + 1.0f) * 0.5f;
+
+        virtualMouseX = Math.round(u * VIRTUAL_WIDTH);
+        virtualMouseY = Math.round(v * VIRTUAL_HEIGHT);
     }
 
     private int toVirtualCoordinate(int coordinate, int offset, double scale) {

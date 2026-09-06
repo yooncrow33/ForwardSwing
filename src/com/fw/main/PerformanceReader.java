@@ -41,8 +41,9 @@ public class PerformanceReader extends Base {
         super(new Builder()
                 .setIntegerKey(1)
                 .setStringKey("1")
-                .setUseConsole(false)
-                .setRenderingOption(RenderingOption.LEGACY)
+                .setCrtJitterEnabled(true)
+                .setUseConsole(true)
+                .setRenderingOption(RenderingOption.CRT)
         );
     }
 
